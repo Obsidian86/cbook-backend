@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const User = require("../schema/userSchema");
+const Accounts = require("../schema/accountsSchema");
 
 let accountData = {
     synced: 1543519362235,
@@ -58,25 +60,44 @@ let accountData = {
         }
     ]
 };
-
-router.get("/getallaccounts", (req, res)=>{
-    res.status(200).json(accountData);
-});
-router.delete("/deleteaccount", (req, res)=>{
-    res.status(200).json(accountData);
-});
-router.post("/addaccount", (req, res)=>{
-    res.status(200).json(accountData);
-});
-router.post("/addtransaction", (req, res)=>{
-    res.status(200).json(accountData);
-});
-router.delete("/deletetransaction", (req, res)=>{
-    res.status(200).json(accountData);
-});
-router.put("/updatetransaction", (req, res)=>{
-    res.status(200).json(accountData);
+  
+router.get("/:user", async (req, res, next)=>{ 
+    try {
+        let allAccounts = await User.findById(req.params.user);
+        allAccounts = await allAccounts.populate("accounts").execPopulate();
+        res.status(200).json({accounts: allAccounts.accounts, synced: allAccounts.synced});
+    } catch (err) {
+        console.log(err);
+    } 
 });
 
+router.post("/:user", async (req, res, next)=>{
+    try {
+        let createdAccount = await Accounts.create(req.body)
+        let user = await User.findById(req.params.user);
+        user.accounts.push(createdAccount._id); 
+        user.synced = Date.now();
+        await user.save();
+        res.status(200).json({synced: user.synced, account: createdAccount});
+    } catch (err) {
+        console.log(err);
+    }
+});
+
+
+router.delete("/:user", async (req, res, next)=>{
+    try { 
+        await Accounts.findOneAndDelete({_id: req.body.account});
+        let user = await User.findById(req.params.user);
+        await user.accounts.splice(user.accounts.indexOf(req.body.account), 1);
+        user.synced = Date.now();
+        await user.save();
+        res.status(200).json({synced: user.synced});
+    } catch (err) {
+        console.log(err);
+    }
+});
+
+ 
 module.exports = router;
 
