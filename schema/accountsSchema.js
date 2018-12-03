@@ -1,4 +1,4 @@
-const mongoose = require("mongoose"); 
+const mongoose = require("mongoose");  
 
 const accountsSchema = new mongoose.Schema({
     name: String,
@@ -9,8 +9,8 @@ const accountsSchema = new mongoose.Schema({
     desc: String,
     transactions: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Transactions"
+        ref: "Transaction"
     }]  
 });
 
-module.exports = mongoose.model("Accounts", accountsSchema);
+module.exports = mongoose.model("Account", accountsSchema);

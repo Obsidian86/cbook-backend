@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require("../schema/userSchema"); 
 const bcrypt = require("bcryptjs");
 
-router.post("/createuser", async (req, res, next) => {
+router.post("/", async (req, res, next) => {
     try {
         let userInfo = { username, password } = req.body;
         userInfo.password = await bcrypt.hash(userInfo.password, 10);
