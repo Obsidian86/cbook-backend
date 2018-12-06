@@ -5,8 +5,8 @@ const Accounts = require("../schema/accountsSchema");
 const Transaction = require("../schema/transactionSchema");
 
 router.get("/:user", async (req, res, next)=>{ 
-    try {
-        let allAccounts = await User.findById(req.params.user); 
+    try { 
+        let allAccounts = await User.findById(req.params.user);  
         allAccounts = allAccounts ? await allAccounts.populate({
                 path: "accounts", 
                 model: "Account", 
@@ -16,7 +16,6 @@ router.get("/:user", async (req, res, next)=>{
                 }
             }).execPopulate() 
         : { synced: 0, accounts: {}}; 
-                
         res.status(200).json({accounts: allAccounts.accounts, synced: allAccounts.synced});
     } catch (err) {
         console.log(err);
@@ -48,9 +47,13 @@ router.post("/:user", async (req, res, next)=>{
 
 router.delete("/:user", async (req, res, next)=>{
     try {  
-        await Accounts.findOneAndDelete({_id: req.body.account});
-        let user = await User.findById(req.params.user);
+        let deletedAccount = await Accounts.findOneAndDelete({_id: req.body.account});
+        let user = await User.findById(req.params.user); 
         await user.accounts.splice(user.accounts.indexOf(req.body.account), 1);
+        let transactionList = deletedAccount.transactions;
+        transactionList.forEach(async(transaction) =>{
+            await Transaction.findOneAndDelete({_id: transaction._id});
+       });
         user.synced = Date.now();
         await user.save();
         res.status(200).json({synced: user.synced});

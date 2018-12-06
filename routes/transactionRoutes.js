@@ -17,7 +17,6 @@ router.post("/", async(req, res, next)=>{
 });
 
 router.delete("/", async (req, res, next)=>{
-        console.log(req.body);
     try {
         let foundAccount = await Account.findById(req.body.accountId); 
         let findTransaction = await Transaction.findById(req.body.transId);  
