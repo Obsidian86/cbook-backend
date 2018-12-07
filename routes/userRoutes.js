@@ -24,21 +24,17 @@ router.post("/login", async (req, res, next) => {
     }
 });
 
-router.delete("/", async (req, res, next) => {
-    try {  
-        let deletedUser = await User.findOneAndDelete({_id: req.body.UserId});
-        let transactionList = [];
+router.delete("/:user", async (req, res, next) => {
+    try {   
+        let deletedUser = await User.findOneAndDelete({_id: req.params.user}); 
         let userAccounts = deletedUser.accounts;
         userAccounts.forEach( async(account) => {
-            let delTrans = await Account.findOneAndDelete({_id: account._id});
-            transactionList.push( delTrans.transactions );
-        });
-        transactionList.forEach(async(transactionSet) => {
-           transactionSet.forEach(async(transaction) =>{
-                await Transaction.findOneAndDelete({_id: transaction._id});
+            let delTrans = await Account.findOneAndDelete({_id: account._id});  
+            delTrans.transactions.forEach(async(transaction) =>{
+                await Transaction.findOneAndDelete({_id: transaction._id}); 
            });
-        });
-        res.status(200).json({synced: 100})
+        }); 
+        res.status(200).json({synced: 1}) 
     } catch (err) {
         next(err);
     }
