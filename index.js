@@ -19,7 +19,7 @@ mongoose.connect(`mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@ds2635
     console.log(err || "connected to db"); 
 });
 
-app.use(cors({origin: '*'})); 
+app.use(cors()); 
 app.use(bodyParser.json());
  
 app.use("/user", userRoutes);
