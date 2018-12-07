@@ -15,11 +15,11 @@ const errorHandler = require("./handlers/errorHandler");
 let app = express();
 const port = process.env.PORT || 3089;
 
-mongoose.connect("mongodb://localhost:27017/cbook", { useNewUrlParser: true }, (err)=>{
+mongoose.connect(`mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@ds263520.mlab.com:63520/cbook`, { useNewUrlParser: true }, (err)=>{
     console.log(err || "connected to db"); 
 });
 
-app.use(cors({origin: 'http://localhost:3000'})); 
+app.use(cors({origin: '*'})); 
 app.use(bodyParser.json());
  
 app.use("/user", userRoutes);
