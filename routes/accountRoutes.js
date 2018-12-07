@@ -1,12 +1,12 @@
 const express = require("express");
-const router = express.Router();
+const router = express.Router({mergeParams: true});
 const User = require("../schema/userSchema");
 const Accounts = require("../schema/accountsSchema");
 const Transaction = require("../schema/transactionSchema");
 
-router.get("/:user", async (req, res, next)=>{ 
+router.get("/", async (req, res, next)=>{ 
     try { 
-        let allAccounts = await User.findById(req.params.user);  
+        let allAccounts = await User.findById(req.params.user);
         allAccounts = allAccounts ? await allAccounts.populate({
                 path: "accounts", 
                 model: "Account", 
@@ -15,14 +15,16 @@ router.get("/:user", async (req, res, next)=>{
                     model: "Transaction"
                 }
             }).execPopulate() 
-        : { synced: 0, accounts: {}}; 
+        : { synced: 0, accounts: {}};
         res.status(200).json({accounts: allAccounts.accounts, synced: allAccounts.synced});
     } catch (err) {
-        console.log(err);
+        let error = new Error();
+        error.message = "Problem getting accounts";
+        next(error);
     } 
 });
 
-router.post("/:user", async (req, res, next)=>{
+router.post("/", async (req, res, next)=>{
     try { 
         let createdAccount = await Accounts.create(req.body);
         let date = new Date(); 
@@ -40,12 +42,14 @@ router.post("/:user", async (req, res, next)=>{
         await user.save();
         res.status(200).json({synced: user.synced, account: createdAccount, tran: createdTransaction});
     } catch (err) {
-        console.log(err);
+        let error = new Error();
+        error.message = "Problem creating account";
+        next(error);
     }
 });
 
 
-router.delete("/:user", async (req, res, next)=>{
+router.delete("/", async (req, res, next)=>{
     try {  
         let deletedAccount = await Accounts.findOneAndDelete({_id: req.body.account});
         let user = await User.findById(req.params.user); 
@@ -58,7 +62,9 @@ router.delete("/:user", async (req, res, next)=>{
         await user.save();
         res.status(200).json({synced: user.synced});
     } catch (err) {
-        console.log(err);
+        let error = new Error();
+        error.message = "Problem deleting account";
+        next(error);
     }
 });
 

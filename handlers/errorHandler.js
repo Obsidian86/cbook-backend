@@ -4,7 +4,6 @@ const errorHandler = (error, req, res, next) =>{
         error: error.message || "Something went wrong"
     }
     console.log(error);
-    return( res.status(sendError.status).json(sendError) ); 
-}
-
+    return( res.status(sendError.status).json({error: sendError}) ); 
+} 
 module.exports = errorHandler;

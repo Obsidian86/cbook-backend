@@ -1,30 +1,41 @@
 const express = require("express");
-const router = express.Router();
+const router = express.Router({mergeParams: true});
 const User = require("../schema/userSchema");
 const Account = require("../schema/accountsSchema");
 const Transaction = require("../schema/transactionSchema"); 
 const bcrypt = require("bcryptjs");
+const auth = require("../handlers/auth");
+const jwt = require("jsonwebtoken");
 
-router.post("/login", async (req, res, next) => { 
+router.post("/login", async (req, res, next) => {
     try {   
         let findUser = await User.findOne({"username": req.body.username}); 
         if( !findUser ){
-            next({ status: 400, message: "No user found" });
+            let error = new Error();
+            error.status = 400;
+            error.message = "Incorrect password";
+            next(error);
         }
         let testPassword = await bcrypt.compare(req.body.password, findUser.password);
         
         if(testPassword){
-            res.status(200).json({userId: findUser._id});
+            let authToken = jwt.sign({id: findUser._id, username: findUser.username}, process.env.S_KEY);
+            res.status(200).json({userId: findUser._id, authToken: authToken});
         }else{
-            next({ status: 400,  message: "Incorrect password" });
+            let error = new Error();
+            error.status = 400;
+            error.message = "Incorrect password";
+            next(error);
         }
         
     } catch (err) {
-        next(err);
+        let error = new Error();
+        error.message = "Problem loggin in";
+        next(error);
     }
 });
 
-router.delete("/:user", async (req, res, next) => {
+router.delete("/:user", auth, async (req, res, next) => {
     try {   
         let deletedUser = await User.findOneAndDelete({_id: req.params.user}); 
         let userAccounts = deletedUser.accounts;
@@ -36,7 +47,9 @@ router.delete("/:user", async (req, res, next) => {
         }); 
         res.status(200).json({synced: 1}) 
     } catch (err) {
-        next(err);
+        let error = new Error();
+        error.message = "Problem deleting user";
+        next(error);
     }
 });
 
@@ -51,9 +64,12 @@ router.post("/newuser", async (req, res, next) => {
             accounts: []
          };
         let newUser = await User.create(userInfo);
-        res.status(200).json({synced: 200, userAccount: newUser});
+        let authToken = jwt.sign({id: newUser._id, username: newUser.username}, process.env.S_KEY);
+        res.status(200).json({synced: 200, userAccount: newUser, authToken: authToken});
     } catch (err) { 
-        next(err);
+        let error = new Error();
+        error.message = "Problem creating user";
+        next(error);
     }
     
 });
