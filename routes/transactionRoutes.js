@@ -7,7 +7,7 @@ router.post("/", async(req, res, next)=>{
     try {
         let foundAccount = await Account.findById(req.body.account_id); 
         let createdTransaction = await Transaction.create( req.body.transaction );
-        foundAccount.balance = parseInt(foundAccount.balance) + parseInt(createdTransaction.amount);
+        foundAccount.balance = parseFloat(foundAccount.balance) + parseFloat(createdTransaction.amount);
         await foundAccount.transactions.push(createdTransaction);
         await foundAccount.save();
         res.status(200).json({newTrans: createdTransaction, synced: Date.now()}); 
