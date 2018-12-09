@@ -13,7 +13,9 @@ router.get("/", async (req, res, next)=>{
                 populate: { 
                     path: "transactions", 
                     model: "Transaction",
-                    sort: [['order', 1 ]]
+                    options: {
+                        sort: '-1'
+                      }
                 }
             }).execPopulate() 
         : { synced: 0, accounts: {}};
