@@ -12,10 +12,7 @@ router.get("/", async (req, res, next)=>{
                 model: "Account", 
                 populate: { 
                     path: "transactions", 
-                    model: "Transaction",
-                    options: {
-                        sort: '1'
-                      }
+                    model: "Transaction"
                 }
             }).execPopulate() 
         : { synced: 0, accounts: {}};
