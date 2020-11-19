@@ -14,8 +14,10 @@ const errorHandler = require("./handlers/errorHandler");
 
 let app = express();
 const port = process.env.PORT || 3089;
+// db_user-88721
+// 6RgwuhO6RrymHJXB
 
-mongoose.connect(`mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@ds263520.mlab.com:63520/cbook`, { useNewUrlParser: true }, (err)=>{
+mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.wd7vr.mongodb.net/cbook?retryWrites=true&w=majority`, { useNewUrlParser: true }, (err)=>{
     console.log(err || "connected to db"); 
 });
 
